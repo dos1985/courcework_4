@@ -10,23 +10,44 @@ movie_ns = Namespace('movies')
 @movie_ns.route('/')
 class MoviesView(Resource):
     def get(self):
-        director = request.args.get("director_id")
-        genre = request.args.get("genre_id")
-        year = request.args.get("year")
-        filters = {
-            "director_id": director,
-            "genre_id": genre,
-            "year": year,
-        }
-        all_movies = movie_service.get_all(filters)
-        res = MovieSchema(many=True).dump(all_movies)
-        return res, 200
+            director = request.args.get("director_id")
+            genre = request.args.get("genre_id")
+            year = request.args.get("year")
+            status = request.args.get("status")
+            page = request.args.get("page", default=1, type=int)
+            filters = {
+                "director_id": director,
+                "genre_id": genre,
+                "year": year,
+            }
+            all_movies = movie_service.get_all(filters, status, page)
+            res = MovieSchema(many=True).dump(all_movies)
+            return res, 200
+        # status = request.args.get("status")
+        # page = int(request.args.get("page", 0))
+        # filters = {
+        #     "status": status,
+        #     "page": page,
+        # }
+        # all_movies = movie_service.get_all(filters)
+        # res = MovieSchema(many=True).dump(all_movies)
+        # return res, 200
 
     def post(self):
         req_json = request.json
         movie = movie_service.create(req_json)
         return "", 201, {"location": f"/movies/{movie.id}"}
 
+    # def get_all(self, filters: dict, status: str, page: int):
+    #     query = self.session.query(Movie)
+    #     if status == 'new':
+    #         query = query.order_by(desc(Movie.created_at))
+    #     if filters:
+    #         for key, value in filters.items():
+    #             if value:
+    #                 query = query.filter(getattr(Movie, key) == value)
+    #     query = query.limit(12).offset((page-1)*12)
+    #     return query.all()
 
 @movie_ns.route('/<int:bid>')
 class MovieView(Resource):

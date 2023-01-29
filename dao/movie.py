@@ -30,6 +30,8 @@ class MovieDAO:
         return self.session.query(Movie).filter(Movie.year == val).all()
 
     def create(self, movie_d):
+        if movie_d is None:
+            raise ValueError("Movie data is None")
         ent = Movie(**movie_d)
         self.session.add(ent)
         self.session.commit()
